@@ -1,0 +1,18 @@
+{
+  "name": "NurulQuran Portal",
+  "short_name": "NQ Portal",
+  "description": "Gateway to all official international portals, regional branches, Web Apps, and mobile apps of NurulQuran.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0d442b",
+  "theme_color": "#0d442b",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "https://iqra.nurulquran.com/icons/palmtree-madinah.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

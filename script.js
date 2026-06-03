@@ -1,11 +1,23 @@
 /**
- * NurulQuran Landing Page JavaScript Core - Version 1.02
- * Handles Multi-Language Translation (EN, FR, UR), RTL switching, Theme Toggle Cycle (Light -> Dark -> Nature),
- * and an automatic responsive Hero Carousel with progress line timer and RTL X-axis correction.
+ * NurulQuran Landing Page JavaScript Core - Version 1.03
+ * Handles Multi-Language Translation (EN, FR, UR, NO), RTL switching, Theme Toggle Cycle (Light -> Dark -> Nature),
+ * nature video play/pause, floating Quran audio player, scroll indicator,
+ * and high-fidelity carousel logic with resume-on-mouseleave timeline filling bar.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
     
+    // ==========================================
+    // 0. Register Service Worker (PWA)
+    // ==========================================
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('Service Worker registered successfully.', reg.scope))
+                .catch(err => console.log('Service Worker registration failed.', err));
+        });
+    }
+
     // ==========================================
     // 1. Language Translation Database & Logic
     // ==========================================
@@ -31,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
             launch_app: "Launch Web App",
             footer_tagline: "Connecting humanity with the divine light of the Noble Quran.",
             footer_contact: "Contact",
-            design_note: "Version 1.02"
+            design_note: "Version 1.03"
         },
         fr: {
             current_lang: "Français",
@@ -54,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
             launch_app: "Lancer l'application",
             footer_tagline: "Connecter l'humanité avec la lumière divine du Noble Coran.",
             footer_contact: "Contact",
-            design_note: "Version 1.02"
+            design_note: "Version 1.03"
         },
         ur: {
             current_lang: "اردو",
@@ -77,7 +89,30 @@ document.addEventListener('DOMContentLoaded', () => {
             launch_app: "ویب ایپ کھولیں",
             footer_tagline: "انسانیت کو قرآنِ مجید کے نور اور ابدی رہنمائی سے جوڑنا۔",
             footer_contact: "رابطہ کریں",
-            design_note: "ورژن 1.02"
+            design_note: "ورژن 1.03"
+        },
+        no: {
+            current_lang: "Norsk",
+            hero_badge: "نُورُ القُرْآن",
+            hero_title: "Quranens Lys",
+            hero_subtitle: "Bismillah, Kobler hjerter til guddommelig veiledning - Utforsk NurulQuran Ressurser.",
+            desc_nq_main: "Hovedsenteret for online islamske kurs, bokhandel, opptak og strukturert pensum.",
+            desc_nq_intl: "Utforsk en enorm digital katalog med lydfiler, forelesninger og seriekategorisering på forskjellige språk.",
+            desc_nq_live: "Følg med på direktesendinger i sanntid, spesielle Ramadan-kurs og interaktive forelesninger live.",
+            desc_tafseer: "En dedikert nettapp med detaljerte forklaringer av Koranen, forelesninger, oversettelser og notater.",
+            desc_iqra: "Interaktiv leseassistent for Koranen. Få tilgang til oversettelse, ord-for-ord-analyse og resitasjoner.",
+            desc_urdu: "Egen nettportal for urdu-talende studenter, med et stort utvalg av lydopptak og transkripsjoner.",
+            desc_norway: "Koble deg til vår aktive regionale avdeling i Norge for lokale kurs, seminarer og nordiske fellesskap.",
+            desc_uk: "Få tilgang til utdanningskurs og arrangementer organisert for det britiske samfunnet og akademiske nettverk.",
+            app_ios_desc: "Last ned offisielle apper på din iPhone or iPad for sømløs offline avspilling av forelesninger og Koran-resitasjoner.",
+            app_android_desc: "Få tilgang til Android-apper med komplette Tafseer-biblioteker, lydstrømming og automatiske varsler.",
+            founder_tag: "GRUNNLEGGER OG INSTRUKTØR",
+            founder_bio: "Kobler globale lyttere til dyp kunnskap om Koranens Tafseer, Hadith-studier og islamsk etikk. Utforsk hennes aktive kanaler og sendinger nedenfor.",
+            visit_portal: "Besøk Portal",
+            launch_app: "Åpne Nettapp",
+            footer_tagline: "Koble menneskeheten til det guddommelige lyset fra den edle Koranen.",
+            footer_contact: "Kontakt",
+            design_note: "Versjon 1.03"
         }
     };
 
@@ -168,17 +203,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // 2. Three-State Light / Dark / Nature Theme
     // ==========================================
     const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const natureVideo = document.getElementById('natureVideo');
     const themes = ['light', 'dark', 'nature'];
 
     const setTheme = (theme) => {
         htmlElement.setAttribute('data-theme', theme);
         localStorage.setItem('nq_theme', theme);
         
-        // Update Button Text
-        const themeBtnText = document.getElementById('themeBtnText');
-        if (theme === 'light') themeBtnText.textContent = 'Light';
-        else if (theme === 'dark') themeBtnText.textContent = 'Dark';
-        else if (theme === 'nature') themeBtnText.textContent = 'Nature';
+        // Dynamic background video control (Preload none, load on demand)
+        if (theme === 'nature') {
+            if (natureVideo.readyState === 0) {
+                natureVideo.load();
+            }
+            natureVideo.play().catch(err => console.log("Video autoplay blocked", err));
+        } else {
+            natureVideo.pause();
+        }
     };
 
     // Toggle theme cycling action
@@ -191,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // ==========================================
-    // 3. Dynamic Card Carousel Logic (8s Timer)
+    // 3. Dynamic Card Carousel Logic (8s Timer + Freeze & Resume)
     // ==========================================
     const carouselTrack = document.getElementById('carouselTrack');
     const carouselPrev = document.getElementById('carouselPrev');
@@ -200,9 +240,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const carouselProgressFill = document.getElementById('carouselProgressFill');
     const slides = Array.from(carouselTrack.children);
     
-    const SLIDE_DURATION = 8000; // Slowed down to 8000ms (8 seconds)
+    const SLIDE_DURATION = 8000; // Slowed down to 8 seconds
     let currentSlideIndex = 0;
-    let autoplayTimer = null;
+    
+    // Autoplay & Pause Elapsed Timeline states
+    let slideTimeoutId = null;
+    let slideStartTime = 0;
+    let accumulatedTime = 0; // Tracks elapsed time on active slide
+    let isPaused = false;
 
     // Create navigation dots dynamically based on slide count
     slides.forEach((_, index) => {
@@ -215,31 +260,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const dots = Array.from(carouselDotsContainer.children);
 
-    // Dynamic filling animation control for timeline progress bar
-    const startProgressLine = () => {
-        // Reset immediately
-        carouselProgressFill.style.transition = 'none';
-        carouselProgressFill.style.width = '0%';
-        
-        // Force reflow
-        carouselProgressFill.offsetWidth;
-        
-        // Transition width to 100% over the slide duration
-        carouselProgressFill.style.transition = `width ${SLIDE_DURATION}ms linear`;
-        carouselProgressFill.style.width = '100%';
-    };
-
-    const freezeProgressLine = () => {
-        // Read current computed width percentage and lock it down (disabling transition)
-        const computedStyle = window.getComputedStyle(carouselProgressFill);
-        const currentWidth = computedStyle.width;
-        carouselProgressFill.style.transition = 'none';
-        carouselProgressFill.style.width = currentWidth;
-    };
-
     const updateCarousel = () => {
         const isRTL = htmlElement.getAttribute('dir') === 'rtl';
-        // Calculate offset (RTL flips transition translation values on X axis)
         const offset = isRTL ? (currentSlideIndex * 100) : -(currentSlideIndex * 100);
         carouselTrack.style.transform = `translateX(${offset}%)`;
         
@@ -252,8 +274,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Trigger new loading timeline line
-        startProgressLine();
+        // Trigger slide transition, reset timeline states
+        resetAutoplay();
     };
 
     const moveToSlide = (index) => {
@@ -267,15 +289,13 @@ document.addEventListener('DOMContentLoaded', () => {
         updateCarousel();
     };
 
-    // Click event controls
+    // Control triggers
     carouselPrev.addEventListener('click', () => {
         moveToSlide(currentSlideIndex - 1);
-        resetAutoplay();
     });
 
     carouselNext.addEventListener('click', () => {
         moveToSlide(currentSlideIndex + 1);
-        resetAutoplay();
     });
 
     carouselDotsContainer.addEventListener('click', (e) => {
@@ -284,37 +304,122 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const dotIndex = parseInt(clickedDot.getAttribute('data-dot-index'));
         moveToSlide(dotIndex);
-        resetAutoplay();
     });
 
-    // Carousel Autoplay cycle
+    // Start fresh 8000ms slide lifecycle
     const startAutoplay = () => {
-        startProgressLine();
-        autoplayTimer = setInterval(() => {
+        isPaused = false;
+        slideStartTime = Date.now();
+        
+        // Reset progress bar filling animation instantly
+        carouselProgressFill.style.transition = 'none';
+        carouselProgressFill.style.width = '0%';
+        carouselProgressFill.offsetHeight; // Reflow
+        
+        // Linear transition to 100% over the full slide duration
+        carouselProgressFill.style.transition = `width ${SLIDE_DURATION}ms linear`;
+        carouselProgressFill.style.width = '100%';
+        
+        slideTimeoutId = setTimeout(() => {
             moveToSlide(currentSlideIndex + 1);
         }, SLIDE_DURATION);
     };
 
-    const stopAutoplay = () => {
-        if (autoplayTimer) {
-            clearInterval(autoplayTimer);
+    // Freeze slide autoplay and save elapsed time
+    const pauseAutoplay = () => {
+        if (isPaused) return;
+        isPaused = true;
+        
+        // Calculate and add elapsed time
+        const elapsed = Date.now() - slideStartTime;
+        accumulatedTime += elapsed;
+        
+        clearTimeout(slideTimeoutId);
+        
+        // Freeze timeline line visually at current computed width
+        const computedStyle = window.getComputedStyle(carouselProgressFill);
+        const currentWidth = computedStyle.width;
+        carouselProgressFill.style.transition = 'none';
+        carouselProgressFill.style.width = currentWidth;
+    };
+
+    // Resume slide from exactly where it was paused (No restarting from 0%)
+    const resumeAutoplay = () => {
+        if (!isPaused) return;
+        isPaused = false;
+        
+        const remaining = SLIDE_DURATION - accumulatedTime;
+        
+        if (remaining <= 0) {
+            moveToSlide(currentSlideIndex + 1);
+        } else {
+            slideStartTime = Date.now();
+            
+            // Resume progress bar width expansion transition for the remaining time
+            carouselProgressFill.style.transition = `width ${remaining}ms linear`;
+            carouselProgressFill.style.width = '100%';
+            
+            slideTimeoutId = setTimeout(() => {
+                moveToSlide(currentSlideIndex + 1);
+            }, remaining);
         }
-        freezeProgressLine();
     };
 
     const resetAutoplay = () => {
-        stopAutoplay();
+        clearTimeout(slideTimeoutId);
+        accumulatedTime = 0;
         startAutoplay();
     };
 
-    // Pause Carousel Autoplay on hover
+    // Hover listeners to pause/resume timelines seamlessly
     const carouselWrapper = document.querySelector('.carousel-wrapper');
-    carouselWrapper.addEventListener('mouseenter', stopAutoplay);
-    carouselWrapper.addEventListener('mouseleave', startAutoplay);
+    carouselWrapper.addEventListener('mouseenter', pauseAutoplay);
+    carouselWrapper.addEventListener('mouseleave', resumeAutoplay);
 
 
     // ==========================================
-    // 4. System Preferences & State Recovery
+    // 4. Floating Quran Audio Player (050shatri.mp3)
+    // ==========================================
+    const quranAudio = document.getElementById('quranAudio');
+    const playerToggleBtn = document.getElementById('playerToggleBtn');
+    const floatingAudioPlayer = document.getElementById('floatingAudioPlayer');
+
+    playerToggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (quranAudio.paused) {
+            quranAudio.play()
+                .then(() => {
+                    floatingAudioPlayer.classList.add('playing');
+                })
+                .catch(err => console.log("Audio play blocked.", err));
+        } else {
+            quranAudio.pause();
+            floatingAudioPlayer.classList.remove('playing');
+        }
+    });
+
+    // Reset visualizer when audio ends
+    quranAudio.addEventListener('ended', () => {
+        floatingAudioPlayer.classList.remove('playing');
+    });
+
+
+    // ==========================================
+    // 5. Scroll Indicator Fading Operations
+    // ==========================================
+    const scrollIndicator = document.getElementById('scrollIndicator');
+    
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 80) {
+            scrollIndicator.classList.add('hidden');
+        } else {
+            scrollIndicator.classList.remove('hidden');
+        }
+    });
+
+
+    // ==========================================
+    // 6. System Preferences & State Recovery
     // ==========================================
     // Restore Language
     const savedLanguage = localStorage.getItem('nq_language');
@@ -338,7 +443,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // ==========================================
-    // 5. Subtle Micro-interactions / Load animations
+    // 7. Subtle Card Reveal Scroll Animations
     // ==========================================
     const revealCards = document.querySelectorAll('.portal-card, .branch-card, .app-card, .lecturer-banner');
     
