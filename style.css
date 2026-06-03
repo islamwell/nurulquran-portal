@@ -2051,3 +2051,354 @@ html:not([data-theme="dark"]):not([data-theme="nature"]) .sun-icon {
         justify-content: center;
     }
 }
+
+/* ==========================================================================
+   v1.07 ENHANCEMENTS
+   ========================================================================== */
+
+/* --- Announcement Banner --- */
+.announcement-banner {
+    background: linear-gradient(135deg, var(--accent-green) 0%, hsl(154, 49%, 22%) 100%);
+    color: #ffffff;
+    padding: 0.6rem 2rem;
+    text-align: center;
+    position: relative;
+    z-index: 101;
+    font-size: 0.88rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    transition: transform var(--transition-normal), opacity var(--transition-normal);
+}
+
+.announcement-banner.hidden {
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    width: 100%;
+}
+
+.announcement-banner .announcement-icon {
+    flex-shrink: 0;
+}
+
+.announcement-banner .announcement-text {
+    flex: 1;
+}
+
+.announcement-banner .announcement-text a {
+    color: var(--accent-gold);
+    text-decoration: underline;
+    font-weight: 600;
+    text-underline-offset: 2px;
+}
+
+.announcement-banner .announcement-text a:hover {
+    color: #ffffff;
+}
+
+.announcement-dismiss {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    padding: 0.25rem;
+    flex-shrink: 0;
+    transition: color var(--transition-fast), transform var(--transition-fast);
+    line-height: 0;
+}
+
+.announcement-dismiss:hover {
+    color: #ffffff;
+    transform: scale(1.15);
+}
+
+[data-theme="dark"] .announcement-banner {
+    background: linear-gradient(135deg, hsl(43, 75%, 28%) 0%, hsl(43, 70%, 18%) 100%);
+}
+
+[data-theme="nature"] .announcement-banner {
+    background: linear-gradient(135deg, hsl(140, 40%, 22%) 0%, hsl(140, 35%, 12%) 100%);
+}
+
+/* --- Search / Filter Bar --- */
+.search-filter-section {
+    max-width: 1400px;
+    margin: -2rem auto 0 auto;
+    padding: 0 2rem 2rem 2rem;
+    position: relative;
+    z-index: 3;
+}
+
+.search-wrapper {
+    max-width: 560px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.85rem 1.25rem 0.85rem 3rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-full);
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    outline: none;
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-slow);
+}
+
+.search-input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+.search-input:focus {
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 0 3px rgba(var(--accent-gold-rgb), 0.12);
+}
+
+.search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+[dir="rtl"] .search-input {
+    padding: 0.85rem 3rem 0.85rem 1.25rem;
+}
+
+[dir="rtl"] .search-icon {
+    left: auto;
+    right: 1rem;
+}
+
+.search-no-results {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 2rem 1rem;
+    font-size: 0.95rem;
+    display: none;
+}
+
+.search-no-results.visible {
+    display: block;
+}
+
+/* Hide sections/cards when filtered out */
+.portal-card.search-hidden,
+.branch-card.search-hidden,
+.app-card.search-hidden {
+    display: none !important;
+}
+
+.portal-group-section.search-section-hidden {
+    display: none !important;
+}
+
+/* --- Enhanced Floating Audio Player (Volume + Progress) --- */
+.player-extra-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: 0.5rem;
+}
+
+[dir="rtl"] .player-extra-controls {
+    margin-left: 0;
+    margin-right: 0.5rem;
+}
+
+.volume-control {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.volume-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    padding: 2px;
+    line-height: 0;
+    transition: color var(--transition-fast);
+}
+
+.volume-btn:hover {
+    color: #ffffff;
+}
+
+.volume-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 60px;
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.25);
+    outline: none;
+    cursor: pointer;
+}
+
+.volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent-gold);
+    cursor: pointer;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+}
+
+.volume-slider::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent-gold);
+    cursor: pointer;
+    border: none;
+}
+
+.track-progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    overflow: hidden;
+}
+
+.track-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent-gold) 0%, hsl(38, 77%, 60%) 100%);
+    transition: width 0.3s linear;
+}
+
+/* --- Back to Top Button --- */
+.back-to-top {
+    position: fixed;
+    bottom: 2rem;
+    left: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-full);
+    background-color: var(--accent-green);
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    z-index: 90;
+    opacity: 0;
+    transform: translateY(20px);
+    pointer-events: none;
+    transition: opacity var(--transition-fast), transform var(--transition-fast), background-color var(--transition-fast);
+}
+
+.back-to-top.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.back-to-top:hover {
+    background-color: var(--accent-gold);
+    transform: translateY(-2px);
+}
+
+[dir="rtl"] .back-to-top {
+    left: auto;
+    right: 2rem;
+}
+
+/* --- Prayer Times Widget --- */
+.prayer-widget {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    background: var(--bg-secondary);
+    padding: 0.35rem 0.85rem;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-color);
+    white-space: nowrap;
+    transition: background-color var(--transition-slow), border-color var(--transition-slow), color var(--transition-slow);
+}
+
+.prayer-widget .prayer-icon {
+    color: var(--accent-gold);
+    flex-shrink: 0;
+}
+
+.prayer-widget .prayer-name {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.prayer-widget .prayer-time {
+    font-variant-numeric: tabular-nums;
+    color: var(--accent-gold);
+    font-weight: 600;
+}
+
+/* --- Mobile Responsive Additions --- */
+@media (max-width: 768px) {
+    .announcement-banner {
+        font-size: 0.8rem;
+        padding: 0.5rem 1rem;
+        gap: 0.5rem;
+    }
+
+    .search-filter-section {
+        padding: 0 1rem 1.5rem 1rem;
+        margin-top: -1rem;
+    }
+
+    .player-extra-controls .volume-slider {
+        width: 40px;
+    }
+
+    .prayer-widget {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.6rem;
+    }
+
+    .back-to-top {
+        bottom: 5.5rem;
+        left: 1rem;
+        width: 38px;
+        height: 38px;
+    }
+
+    [dir="rtl"] .back-to-top {
+        left: auto;
+        right: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .prayer-widget {
+        display: none;
+    }
+
+    .volume-slider {
+        display: none;
+    }
+}

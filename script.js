@@ -1,9 +1,38 @@
 /**
- * NurulQuran Landing Page JavaScript Core - Version 1.06
- * Handles Multi-Language Translation (EN, FR, UR, NO), RTL switching, Theme Toggle Cycle (Light -> Dark -> Nature),
- * nature video play/pause, floating Quran audio player, scroll indicator,
- * and high-fidelity carousel logic with resume-on-mouseleave timeline filling bar.
+ * NurulQuran Landing Page JavaScript Core - Version 1.07
+ * Handles: Multi-Language Translation (EN, FR, UR, NO), RTL switching,
+ * Theme Toggle Cycle (Light -> Dark -> Nature), nature video play/pause,
+ * floating Quran audio player with playlist + volume + progress bar,
+ * scroll indicator, search/filter, back-to-top, keyboard navigation,
+ * touch swipe for carousel, and announcement banner system.
  */
+
+// ============================================================================
+// ██████  ANNOUNCEMENT CONFIGURATION  ██████
+// ============================================================================
+// ✏️  TO ADD/EDIT ANNOUNCEMENTS — just edit this array!
+//     Each entry: { text, link (optional), linkText (optional), enabled }
+//     Set enabled: false to hide without deleting.
+//     HTML inside text is allowed (for bold, etc.)
+//     Only the FIRST enabled announcement is shown.
+// ============================================================================
+const ANNOUNCEMENTS = [
+    {
+        text: "📖 New Dawrah-e-Quran series starting soon!",
+        link: "https://nurulquranlive.com",
+        linkText: "Register Now",
+        enabled: true
+    },
+    // Add more announcements below. Only the first enabled one is displayed.
+    // {
+    //     text: "🌙 Ramadan Mubarak! Special courses available.",
+    //     link: "https://nurulquran.com",
+    //     linkText: "View Courses",
+    //     enabled: false
+    // },
+];
+// ============================================================================
+
 
 document.addEventListener('DOMContentLoaded', () => {
     
@@ -47,9 +76,11 @@ document.addEventListener('DOMContentLoaded', () => {
             visit_portal: "Visit Portal",
             launch_app: "Launch Web App",
             download_app: "Download App",
+            search_placeholder: "Search portals, apps, branches...",
+            search_no_results: "No results found.",
             footer_tagline: "Connecting humanity with the divine light of the Noble Quran.",
             footer_contact: "Contact",
-            design_note: "Version 1.06"
+            design_note: "Version 1.07"
         },
         fr: {
             current_lang: "Français",
@@ -76,9 +107,11 @@ document.addEventListener('DOMContentLoaded', () => {
             visit_portal: "Visiter le portail",
             launch_app: "Lancer l'application",
             download_app: "Télécharger l'application",
+            search_placeholder: "Rechercher portails, applications, branches...",
+            search_no_results: "Aucun résultat trouvé.",
             footer_tagline: "Connecter l'humanité avec la lumière divine du Noble Coran.",
             footer_contact: "Contact",
-            design_note: "Version 1.06"
+            design_note: "Version 1.07"
         },
         ur: {
             current_lang: "اردو",
@@ -105,9 +138,11 @@ document.addEventListener('DOMContentLoaded', () => {
             visit_portal: "پورٹل پر جائیں",
             launch_app: "ویب ایپ کھولیں",
             download_app: "ایپ ڈاؤن لوڈ کریں",
+            search_placeholder: "پورٹلز، ایپس، برانچز تلاش کریں...",
+            search_no_results: "کوئی نتائج نہیں ملے۔",
             footer_tagline: "انسانیت کو قرآنِ مجید کے نور اور ابدی رہنمائی سے جوڑنا۔",
             footer_contact: "رابطہ کریں",
-            design_note: "ورژن 1.06"
+            design_note: "ورژن 1.07"
         },
         no: {
             current_lang: "Norsk",
@@ -134,9 +169,11 @@ document.addEventListener('DOMContentLoaded', () => {
             visit_portal: "Besøk Portal",
             launch_app: "Åpne Nettapp",
             download_app: "Last ned App",
+            search_placeholder: "Søk portaler, apper, filialer...",
+            search_no_results: "Ingen resultater funnet.",
             footer_tagline: "Koble menneskeheten til det guddommelige lyset fra den edle Koranen.",
             footer_contact: "Kontakt",
-            design_note: "Versjon 1.06"
+            design_note: "Versjon 1.07"
         }
     };
 
@@ -167,6 +204,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Switch Language Handler
+    const searchInput = document.getElementById('searchInput');
+    const searchNoResults = document.getElementById('searchNoResults');
+
     const setLanguage = (lang) => {
         if (!translations[lang]) return;
 
@@ -205,6 +245,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 el.textContent = translations[lang][key];
             }
         });
+
+        // Translate search placeholder and no-results
+        if (searchInput) searchInput.placeholder = translations[lang].search_placeholder || searchInput.placeholder;
+        if (searchNoResults) searchNoResults.textContent = translations[lang].search_no_results || searchNoResults.textContent;
 
         // Retrigger carousel slide alignment to adjust LTR/RTL offset directions
         updateCarousel();
@@ -255,7 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // ==========================================
-    // 3. Dynamic Card Carousel Logic (8s Timer + Freeze & Resume via requestAnimationFrame)
+    // 3. Dynamic Card Carousel Logic (8s Timer + Freeze & Resume + Touch Swipe + Keyboard Nav)
     // ==========================================
     const carouselTrack = document.getElementById('carouselTrack');
     const carouselPrev = document.getElementById('carouselPrev');
@@ -347,6 +391,70 @@ document.addEventListener('DOMContentLoaded', () => {
         lastTime = performance.now(); // Reset lastTime to prevent dt spike
     });
 
+    // --- Touch Swipe Support ---
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchEndX = 0;
+    let isSwiping = false;
+
+    carouselWrapper.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+        isSwiping = true;
+    }, { passive: true });
+
+    carouselWrapper.addEventListener('touchmove', (e) => {
+        if (!isSwiping) return;
+        const diffX = Math.abs(e.changedTouches[0].screenX - touchStartX);
+        const diffY = Math.abs(e.changedTouches[0].screenY - touchStartY);
+        // If horizontal swipe is dominant, prevent vertical scroll
+        if (diffX > diffY && diffX > 10) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    carouselWrapper.addEventListener('touchend', (e) => {
+        if (!isSwiping) return;
+        isSwiping = false;
+        touchEndX = e.changedTouches[0].screenX;
+        const swipeDistance = touchEndX - touchStartX;
+        const isRTL = htmlElement.getAttribute('dir') === 'rtl';
+        const threshold = 50; // minimum swipe distance in pixels
+
+        if (Math.abs(swipeDistance) > threshold) {
+            if (isRTL) {
+                // In RTL, swipe right goes next, swipe left goes prev
+                swipeDistance > 0 ? moveToSlide(currentSlideIndex + 1) : moveToSlide(currentSlideIndex - 1);
+            } else {
+                // In LTR, swipe left goes next, swipe right goes prev
+                swipeDistance < 0 ? moveToSlide(currentSlideIndex + 1) : moveToSlide(currentSlideIndex - 1);
+            }
+        }
+    }, { passive: true });
+
+    // --- Keyboard Navigation ---
+    document.addEventListener('keydown', (e) => {
+        // Escape key closes dropdown
+        if (e.key === 'Escape') {
+            langBtn.parentElement.classList.remove('open');
+            langBtn.setAttribute('aria-expanded', 'false');
+            return;
+        }
+
+        // Arrow keys for carousel (only if not typing in search)
+        if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
+
+        if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            const isRTL = htmlElement.getAttribute('dir') === 'rtl';
+            isRTL ? moveToSlide(currentSlideIndex + 1) : moveToSlide(currentSlideIndex - 1);
+        } else if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            const isRTL = htmlElement.getAttribute('dir') === 'rtl';
+            isRTL ? moveToSlide(currentSlideIndex - 1) : moveToSlide(currentSlideIndex + 1);
+        }
+    });
+
     // requestAnimationFrame tick loop
     const tick = (now) => {
         const dt = now - lastTime;
@@ -371,15 +479,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // ==========================================
-    // 4. Floating Quran Audio Player (Auto-Play Playlist)
-    //    Track 1: Quran Ki Kirnain (auto-play @ 30%)
-    //    Track 2: Surah Qaf - Abu Bakr Al Shatri
+    // 4. Floating Quran Audio Player (Auto-Play Playlist + Volume + Progress Bar)
     // ==========================================
     const quranAudio = document.getElementById('quranAudio');
     const playerToggleBtn = document.getElementById('playerToggleBtn');
     const floatingAudioPlayer = document.getElementById('floatingAudioPlayer');
     const playerTitle = document.getElementById('playerTitle');
     const playerSubtitle = document.getElementById('playerSubtitle');
+    const volumeSlider = document.getElementById('volumeSlider');
+    const volumeBtn = document.getElementById('volumeBtn');
+    const trackProgressFill = document.getElementById('trackProgressFill');
 
     // Playlist definition
     const playlist = [
@@ -395,6 +504,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     ];
     let currentTrackIndex = 0;
+    let savedVolume = 0.3;
 
     // Set initial volume to 30%
     quranAudio.volume = 0.3;
@@ -440,9 +550,35 @@ document.addEventListener('DOMContentLoaded', () => {
         playNextTrack();
     });
 
+    // --- Volume Slider ---
+    volumeSlider.addEventListener('input', (e) => {
+        const vol = parseInt(e.target.value) / 100;
+        quranAudio.volume = vol;
+        savedVolume = vol;
+    });
+
+    // Mute / Unmute toggle
+    volumeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (quranAudio.volume > 0) {
+            savedVolume = quranAudio.volume;
+            quranAudio.volume = 0;
+            volumeSlider.value = 0;
+        } else {
+            quranAudio.volume = savedVolume || 0.3;
+            volumeSlider.value = Math.round(quranAudio.volume * 100);
+        }
+    });
+
+    // --- Track Progress Bar ---
+    quranAudio.addEventListener('timeupdate', () => {
+        if (quranAudio.duration && isFinite(quranAudio.duration)) {
+            const pct = (quranAudio.currentTime / quranAudio.duration) * 100;
+            trackProgressFill.style.width = `${pct}%`;
+        }
+    });
+
     // Auto-play Track 1 at 30% volume on page load
-    // Browsers may block autoplay without user interaction, so we try
-    // and set up a one-time click fallback if blocked
     const attemptAutoplay = () => {
         quranAudio.play()
             .then(() => {
@@ -469,16 +605,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // ==========================================
-    // 5. Scroll Indicator Fading Operations
+    // 5. Scroll Indicator + Back to Top Button
     // ==========================================
     const scrollIndicator = document.getElementById('scrollIndicator');
+    const backToTopBtn = document.getElementById('backToTopBtn');
     
     window.addEventListener('scroll', () => {
+        // Scroll indicator
         if (window.scrollY > 80) {
             scrollIndicator.classList.add('hidden');
         } else {
             scrollIndicator.classList.remove('hidden');
         }
+
+        // Back to top button
+        if (window.scrollY > 500) {
+            backToTopBtn.classList.add('visible');
+        } else {
+            backToTopBtn.classList.remove('visible');
+        }
+    });
+
+    backToTopBtn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
 
@@ -501,8 +650,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         setTheme(prefersDark ? 'dark' : 'light');
     }
-
-    // Carousel loop initialized automatically.
 
 
     // ==========================================
@@ -530,4 +677,81 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('scroll', revealOnScroll);
     setTimeout(revealOnScroll, 100);
+
+
+    // ==========================================
+    // 8. Search / Filter Logic
+    // ==========================================
+    const allSearchableCards = document.querySelectorAll('.portal-card, .branch-card, .app-card');
+    const allSections = document.querySelectorAll('.portal-group-section');
+
+    searchInput.addEventListener('input', () => {
+        const query = searchInput.value.trim().toLowerCase();
+        let totalVisible = 0;
+
+        allSearchableCards.forEach(card => {
+            const text = card.textContent.toLowerCase();
+            const href = (card.getAttribute('href') || '').toLowerCase();
+            const match = !query || text.includes(query) || href.includes(query);
+            
+            if (match) {
+                card.classList.remove('search-hidden');
+                totalVisible++;
+            } else {
+                card.classList.add('search-hidden');
+            }
+        });
+
+        // Hide entire sections if all children are hidden
+        allSections.forEach(section => {
+            const visibleCards = section.querySelectorAll('.portal-card:not(.search-hidden), .branch-card:not(.search-hidden), .app-card:not(.search-hidden)');
+            if (visibleCards.length === 0 && query) {
+                section.classList.add('search-section-hidden');
+            } else {
+                section.classList.remove('search-section-hidden');
+            }
+        });
+
+        // Show "no results" message
+        if (totalVisible === 0 && query) {
+            searchNoResults.classList.add('visible');
+        } else {
+            searchNoResults.classList.remove('visible');
+        }
+    });
+
+
+    // ==========================================
+    // 9. Announcement Banner System
+    // ==========================================
+    const announcementBanner = document.getElementById('announcementBanner');
+    const announcementText = document.getElementById('announcementText');
+    const announcementDismiss = document.getElementById('announcementDismiss');
+
+    // Find the first enabled announcement
+    const activeAnnouncement = ANNOUNCEMENTS.find(a => a.enabled);
+
+    if (activeAnnouncement) {
+        // Build the announcement HTML
+        let html = activeAnnouncement.text;
+        if (activeAnnouncement.link && activeAnnouncement.linkText) {
+            html += ` <a href="${activeAnnouncement.link}" target="_blank" rel="noopener">${activeAnnouncement.linkText}</a>`;
+        }
+        announcementText.innerHTML = html;
+
+        // Check if this announcement was previously dismissed (by hashing the text)
+        const announcementKey = 'nq_dismissed_' + btoa(encodeURIComponent(activeAnnouncement.text)).slice(0, 20);
+        const wasDismissed = localStorage.getItem(announcementKey);
+
+        if (!wasDismissed) {
+            announcementBanner.classList.remove('hidden');
+        }
+
+        // Dismiss handler
+        announcementDismiss.addEventListener('click', () => {
+            announcementBanner.classList.add('hidden');
+            localStorage.setItem(announcementKey, 'true');
+        });
+    }
+
 });
