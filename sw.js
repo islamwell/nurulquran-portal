@@ -3,13 +3,26 @@
  * Caches core landing assets and Quran recitation track for full offline usage.
  */
 
-const CACHE_NAME = 'nq-portal-cache-v1.04';
+const CACHE_NAME = 'nq-portal-cache-v1.05';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
     './style.css',
     './script.js',
     './050shatri.mp3',
+    './thumbnails/thumb_nurulquran.png',
+    './thumbnails/thumb_nqintl.png',
+    './thumbnails/thumb_nqlive.png',
+    './thumbnails/thumb_iqra.png',
+    './thumbnails/thumb_tafseer.png',
+    './thumbnails/thumb_urdu.png',
+    './thumbnails/thumb_norway.png',
+    './thumbnails/thumb_uk.png',
+    './thumbnails/thumb_pakistan.png',
+    './thumbnails/thumb_usa.png',
+    './thumbnails/thumb_ios_audio.png',
+    './thumbnails/thumb_ios_dua.png',
+    './thumbnails/thumb_android.png',
     'https://iqra.nurulquran.com/icons/palmtree-madinah.svg',
     'https://nurulquran.com/wp-content/uploads/2018/02/nq-logo-200-143.png'
 ];
