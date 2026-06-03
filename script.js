@@ -1,7 +1,7 @@
 /**
- * NurulQuran Landing Page JavaScript Core - Version 1.01
+ * NurulQuran Landing Page JavaScript Core - Version 1.02
  * Handles Multi-Language Translation (EN, FR, UR), RTL switching, Theme Toggle Cycle (Light -> Dark -> Nature),
- * and an automatic responsive Hero Carousel with LTR/RTL support.
+ * and an automatic responsive Hero Carousel with progress line timer and RTL X-axis correction.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -13,8 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
         en: {
             current_lang: "English",
             hero_badge: "نُورُ القُرْآن",
-            hero_title: "Connecting Hearts to Divine Guidance",
-            hero_subtitle: "Explore the official branches, platforms, applications, and learning resources of NurulQuran worldwide.",
+            hero_title: "Light of the Quran",
+            hero_subtitle: "Bismillah, Connecting Hearts to Divine Guidance - Explore NurulQuran Resources.",
             desc_nq_main: "The main central hub for online Islamic courses, book store, admissions, and structured curriculum.",
             desc_nq_intl: "Explore a massive digital catalog of audios, lectures, and series categorization in various languages.",
             desc_nq_live: "Tune in to real-time online broadcasts, Ramadan special courses, and live interactive lectures.",
@@ -31,13 +31,13 @@ document.addEventListener('DOMContentLoaded', () => {
             launch_app: "Launch Web App",
             footer_tagline: "Connecting humanity with the divine light of the Noble Quran.",
             footer_contact: "Contact",
-            design_note: "Version 1.01"
+            design_note: "Version 1.02"
         },
         fr: {
             current_lang: "Français",
             hero_badge: "نُورُ القُرْآن",
-            hero_title: "Connecter les cœurs à la guidance divine",
-            hero_subtitle: "Explorez les branches officielles, les plateformes, les applications et les ressources d'apprentissage de NurulQuran dans le monde entier.",
+            hero_title: "La lumière du Coran",
+            hero_subtitle: "Bismillah, Connecter les cœurs à la guidance divine - Explorez les ressources de NurulQuran.",
             desc_nq_main: "Le hub central principal pour les cours islamiques en ligne, la librairie, les admissions et le programme structuré.",
             desc_nq_intl: "Explorez un vaste catalogue numérique d'audios, de conférences et de catégorisations de séries en plusieurs langues.",
             desc_nq_live: "Écoutez les diffusions en ligne en temps réel, les cours spéciaux du Ramadan et les conférences interactives en direct.",
@@ -54,17 +54,17 @@ document.addEventListener('DOMContentLoaded', () => {
             launch_app: "Lancer l'application",
             footer_tagline: "Connecter l'humanité avec la lumière divine du Noble Coran.",
             footer_contact: "Contact",
-            design_note: "Version 1.01"
+            design_note: "Version 1.02"
         },
         ur: {
             current_lang: "اردو",
             hero_badge: "نُورُ القُرْآن",
-            hero_title: "دلوں کو ہدایتِ ربّانی سے جوڑنا",
-            hero_subtitle: "دنیا بھر میں نورالقرآن کے آفیشل تعلیمی پورٹلز، علاقائی شاخوں، اور موبائل ایپس کا ایک ہی جگہ پر خوبصورت سنگم۔",
+            hero_title: "نور القرآن",
+            hero_subtitle: "بسم اللہ، دلوں کو ہدایتِ ربّانی سے جوڑنا - نور القرآن کے تعلیمی وسائل تلاش کریں۔",
             desc_nq_main: "تفسیرِ قرآن اور اسلامی تعلیمات کا مرکزی پورٹل جہاں داخلے، آن لائن کورسز اور کتب دستیاب ہیں۔",
             desc_nq_intl: "مختلف موضوعات پر آڈیوز، تقاریر اور لیکچرز کا ایک وسیع اور منظم بین الاقوامی ذخیرہ۔",
             desc_nq_live: "رمضان کے خصوصی پروگرامز، دروس اور براہِ راست نشریات کا لائیو سٹریمنگ پورٹل۔",
-            desc_tafseer: "قرآنِ مجید کی تفصیلی تفاسیر، آڈیو لیکچرز، اور تحریری نوٹس پر مشتمل مخصوص ویب ایپ۔",
+            desc_tafseer: "قرآنِ مجید کی تفصیلی تفاسیر، آڈیو لیکچرز، اور تحریری نوٹس پر مشتمل خصوصی ویب ایپ۔",
             desc_iqra: "لفظ بہ لفظ ترجمہ، تجوید، تلاوت اور سورتوں کے ساتھ قرآن پڑھنے کا جدید معلوماتی پورٹل۔",
             desc_urdu: "اردو زبان میں لیکچرز، آڈیو ریکارڈنگز، اور تعلیمی مواد کا مخصوص ڈیجیٹل مرکز۔",
             desc_norway: "ناروے میں کورسز، سیمینارز اور مقامی مسلم کمیونٹی سے جڑنے کے لیے ناروے برانچ کا پورٹل۔",
@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
             launch_app: "ویب ایپ کھولیں",
             footer_tagline: "انسانیت کو قرآنِ مجید کے نور اور ابدی رہنمائی سے جوڑنا۔",
             footer_contact: "رابطہ کریں",
-            design_note: "ورژن 1.01"
+            design_note: "ورژن 1.02"
         }
     };
 
@@ -191,14 +191,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // ==========================================
-    // 3. Dynamic Card Carousel Logic
+    // 3. Dynamic Card Carousel Logic (8s Timer)
     // ==========================================
     const carouselTrack = document.getElementById('carouselTrack');
     const carouselPrev = document.getElementById('carouselPrev');
     const carouselNext = document.getElementById('carouselNext');
     const carouselDotsContainer = document.getElementById('carouselDots');
+    const carouselProgressFill = document.getElementById('carouselProgressFill');
     const slides = Array.from(carouselTrack.children);
     
+    const SLIDE_DURATION = 8000; // Slowed down to 8000ms (8 seconds)
     let currentSlideIndex = 0;
     let autoplayTimer = null;
 
@@ -212,6 +214,28 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const dots = Array.from(carouselDotsContainer.children);
+
+    // Dynamic filling animation control for timeline progress bar
+    const startProgressLine = () => {
+        // Reset immediately
+        carouselProgressFill.style.transition = 'none';
+        carouselProgressFill.style.width = '0%';
+        
+        // Force reflow
+        carouselProgressFill.offsetWidth;
+        
+        // Transition width to 100% over the slide duration
+        carouselProgressFill.style.transition = `width ${SLIDE_DURATION}ms linear`;
+        carouselProgressFill.style.width = '100%';
+    };
+
+    const freezeProgressLine = () => {
+        // Read current computed width percentage and lock it down (disabling transition)
+        const computedStyle = window.getComputedStyle(carouselProgressFill);
+        const currentWidth = computedStyle.width;
+        carouselProgressFill.style.transition = 'none';
+        carouselProgressFill.style.width = currentWidth;
+    };
 
     const updateCarousel = () => {
         const isRTL = htmlElement.getAttribute('dir') === 'rtl';
@@ -227,6 +251,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 dot.classList.remove('active');
             }
         });
+
+        // Trigger new loading timeline line
+        startProgressLine();
     };
 
     const moveToSlide = (index) => {
@@ -260,17 +287,19 @@ document.addEventListener('DOMContentLoaded', () => {
         resetAutoplay();
     });
 
-    // Carousel Autoplay cycle (4.5 seconds)
+    // Carousel Autoplay cycle
     const startAutoplay = () => {
+        startProgressLine();
         autoplayTimer = setInterval(() => {
             moveToSlide(currentSlideIndex + 1);
-        }, 4500);
+        }, SLIDE_DURATION);
     };
 
     const stopAutoplay = () => {
         if (autoplayTimer) {
             clearInterval(autoplayTimer);
         }
+        freezeProgressLine();
     };
 
     const resetAutoplay = () => {

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   NurulQuran Landing Page Stylesheet - Version 1.01
+   NurulQuran Landing Page Stylesheet - Version 1.02
    Designed for Visual Excellence & 2026 Aesthetics (No database, pure speed)
    ========================================================================== */
 
@@ -309,7 +309,6 @@ body {
     display: none;
 }
 
-/* Cycle Sunlight / Moon / Foliage dynamic icon display */
 html:not([data-theme="dark"]):not([data-theme="nature"]) .sun-icon {
     display: block;
 }
@@ -397,6 +396,24 @@ html:not([data-theme="dark"]):not([data-theme="nature"]) .sun-icon {
     -webkit-backdrop-filter: blur(var(--glass-blur));
 }
 
+/* Dynamic Filling Loading Bar */
+.carousel-progress-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3.5px;
+    background-color: var(--border-color);
+    z-index: 10;
+}
+
+.carousel-progress-fill {
+    height: 100%;
+    width: 0%;
+    background-color: var(--accent-gold);
+    transition: width 8000ms linear; /* Fills up line linearly over 8 seconds */
+}
+
 .carousel-viewport {
     width: 100%;
     overflow: hidden;
@@ -408,6 +425,7 @@ html:not([data-theme="dark"]):not([data-theme="nature"]) .sun-icon {
     width: 100%;
 }
 
+/* Slides styled as fully clickable block links */
 .carousel-slide {
     flex-shrink: 0;
     width: 100%;
@@ -416,6 +434,19 @@ html:not([data-theme="dark"]):not([data-theme="nature"]) .sun-icon {
     gap: 2.5rem;
     padding: 1.5rem;
     text-align: left;
+    text-decoration: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    border-radius: var(--radius-md);
+    transition: background-color var(--transition-fast);
+}
+
+.carousel-slide:hover {
+    background-color: rgba(var(--accent-green-rgb), 0.015);
+}
+
+[data-theme="dark"] .carousel-slide:hover {
+    background-color: rgba(255, 255, 255, 0.015);
 }
 
 .slide-preview-area {
@@ -428,6 +459,12 @@ html:not([data-theme="dark"]):not([data-theme="nature"]) .sun-icon {
     box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.05);
     overflow: hidden;
     position: relative;
+    transition: transform var(--transition-normal);
+}
+
+/* Entire card hover translates to preview area zoom and button transform */
+.carousel-slide:hover .slide-preview-area {
+    transform: scale(1.02);
 }
 
 /* Interactive gradient backgrounds for previews */
@@ -831,13 +868,15 @@ html:not([data-theme="dark"]):not([data-theme="nature"]) .sun-icon {
     border: 1px solid var(--accent-green);
     padding: 0.75rem 1.75rem;
     border-radius: var(--radius-full);
-    text-decoration: none;
     font-size: 0.9rem;
     font-weight: 600;
+    display: inline-block;
+    text-align: center;
     transition: background-color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
 }
 
-.slide-btn:hover {
+/* Action animations trigger on hover of the entire slide anchor */
+.carousel-slide:hover .slide-btn {
     background-color: var(--accent-gold);
     border-color: var(--accent-gold);
     transform: translateY(-2px);
@@ -1334,7 +1373,7 @@ html:not([data-theme="dark"]):not([data-theme="nature"]) .sun-icon {
     line-height: 1.6;
 }
 
-/* 3 columns structure (Mixlr link removed) */
+/* 3 columns structure */
 .social-channels-grid.three-columns {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -1564,6 +1603,12 @@ html:not([data-theme="dark"]):not([data-theme="nature"]) .sun-icon {
 
 [dir="rtl"] .carousel-slide {
     text-align: right;
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .slide-content-area {
+    text-align: right;
+    align-items: flex-start;
 }
 
 [dir="rtl"] .slide-btn {
@@ -1612,10 +1657,11 @@ html:not([data-theme="dark"]):not([data-theme="nature"]) .sun-icon {
         font-size: 2.5rem;
     }
 
-    .carousel-slide {
+    .carousel-slide, [dir="rtl"] .carousel-slide {
         flex-direction: column;
         gap: 1.5rem;
         padding: 1rem;
+        text-align: center;
     }
 
     .slide-preview-area {
@@ -1623,25 +1669,13 @@ html:not([data-theme="dark"]):not([data-theme="nature"]) .sun-icon {
         height: 200px;
     }
 
-    .slide-content-area {
+    .slide-content-area, [dir="rtl"] .slide-content-area {
         width: 100%;
         text-align: center;
         align-items: center;
     }
 
-    .slide-btn {
-        align-self: center;
-    }
-
-    [dir="rtl"] .carousel-slide {
-        flex-direction: column;
-    }
-
-    [dir="rtl"] .slide-content-area {
-        align-items: center;
-    }
-
-    [dir="rtl"] .slide-btn {
+    .slide-btn, [dir="rtl"] .slide-btn {
         align-self: center;
     }
 
