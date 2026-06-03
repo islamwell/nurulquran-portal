@@ -1,5 +1,5 @@
 /**
- * NurulQuran Landing Page JavaScript Core - Version 1.05
+ * NurulQuran Landing Page JavaScript Core - Version 1.06
  * Handles Multi-Language Translation (EN, FR, UR, NO), RTL switching, Theme Toggle Cycle (Light -> Dark -> Nature),
  * nature video play/pause, floating Quran audio player, scroll indicator,
  * and high-fidelity carousel logic with resume-on-mouseleave timeline filling bar.
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
             download_app: "Download App",
             footer_tagline: "Connecting humanity with the divine light of the Noble Quran.",
             footer_contact: "Contact",
-            design_note: "Version 1.05"
+            design_note: "Version 1.06"
         },
         fr: {
             current_lang: "Français",
@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
             download_app: "Télécharger l'application",
             footer_tagline: "Connecter l'humanité avec la lumière divine du Noble Coran.",
             footer_contact: "Contact",
-            design_note: "Version 1.05"
+            design_note: "Version 1.06"
         },
         ur: {
             current_lang: "اردو",
@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
             download_app: "ایپ ڈاؤن لوڈ کریں",
             footer_tagline: "انسانیت کو قرآنِ مجید کے نور اور ابدی رہنمائی سے جوڑنا۔",
             footer_contact: "رابطہ کریں",
-            design_note: "ورژن 1.05"
+            design_note: "ورژن 1.06"
         },
         no: {
             current_lang: "Norsk",
@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
             download_app: "Last ned App",
             footer_tagline: "Koble menneskeheten til det guddommelige lyset fra den edle Koranen.",
             footer_contact: "Kontakt",
-            design_note: "Versjon 1.05"
+            design_note: "Versjon 1.06"
         }
     };
 
@@ -371,12 +371,56 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // ==========================================
-    // 4. Floating Quran Audio Player (050shatri.mp3)
+    // 4. Floating Quran Audio Player (Auto-Play Playlist)
+    //    Track 1: Quran Ki Kirnain (auto-play @ 30%)
+    //    Track 2: Surah Qaf - Abu Bakr Al Shatri
     // ==========================================
     const quranAudio = document.getElementById('quranAudio');
     const playerToggleBtn = document.getElementById('playerToggleBtn');
     const floatingAudioPlayer = document.getElementById('floatingAudioPlayer');
+    const playerTitle = document.getElementById('playerTitle');
+    const playerSubtitle = document.getElementById('playerSubtitle');
 
+    // Playlist definition
+    const playlist = [
+        {
+            src: 'https://nqapp.nurulquran.com/audios/Short-Series/Quran-Ki-Kirnain/01-Quran-is-my-Life-Edited-complete-Lec.mp3',
+            title: 'Quran is my Life',
+            subtitle: 'Quran Ki Kirnain'
+        },
+        {
+            src: '050shatri.mp3',
+            title: 'Surah Qaf (050)',
+            subtitle: 'Abu Bakr Al Shatri'
+        }
+    ];
+    let currentTrackIndex = 0;
+
+    // Set initial volume to 30%
+    quranAudio.volume = 0.3;
+
+    // Update player UI labels
+    const updatePlayerLabels = () => {
+        const track = playlist[currentTrackIndex];
+        playerTitle.textContent = track.title;
+        playerSubtitle.textContent = track.subtitle;
+    };
+
+    // Load and play next track in playlist
+    const playNextTrack = () => {
+        currentTrackIndex++;
+        if (currentTrackIndex < playlist.length) {
+            const track = playlist[currentTrackIndex];
+            quranAudio.src = track.src;
+            updatePlayerLabels();
+            quranAudio.play().catch(err => console.log("Next track play blocked.", err));
+        } else {
+            // All tracks finished
+            floatingAudioPlayer.classList.remove('playing');
+        }
+    };
+
+    // Toggle play/pause
     playerToggleBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         if (quranAudio.paused) {
@@ -391,10 +435,37 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Reset visualizer when audio ends
+    // When current track ends, advance to next
     quranAudio.addEventListener('ended', () => {
-        floatingAudioPlayer.classList.remove('playing');
+        playNextTrack();
     });
+
+    // Auto-play Track 1 at 30% volume on page load
+    // Browsers may block autoplay without user interaction, so we try
+    // and set up a one-time click fallback if blocked
+    const attemptAutoplay = () => {
+        quranAudio.play()
+            .then(() => {
+                floatingAudioPlayer.classList.add('playing');
+            })
+            .catch(() => {
+                // Autoplay blocked: wait for first user interaction to start
+                const startOnInteraction = () => {
+                    quranAudio.play()
+                        .then(() => {
+                            floatingAudioPlayer.classList.add('playing');
+                        })
+                        .catch(() => {});
+                    document.removeEventListener('click', startOnInteraction);
+                    document.removeEventListener('touchstart', startOnInteraction);
+                };
+                document.addEventListener('click', startOnInteraction, { once: true });
+                document.addEventListener('touchstart', startOnInteraction, { once: true });
+            });
+    };
+
+    // Delay autoplay slightly to let page settle
+    setTimeout(attemptAutoplay, 800);
 
 
     // ==========================================
