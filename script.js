@@ -1,5 +1,5 @@
 /**
- * NurulQuran Landing Page JavaScript Core - Version 1.03
+ * NurulQuran Landing Page JavaScript Core - Version 1.04
  * Handles Multi-Language Translation (EN, FR, UR, NO), RTL switching, Theme Toggle Cycle (Light -> Dark -> Nature),
  * nature video play/pause, floating Quran audio player, scroll indicator,
  * and high-fidelity carousel logic with resume-on-mouseleave timeline filling bar.
@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
             launch_app: "Launch Web App",
             footer_tagline: "Connecting humanity with the divine light of the Noble Quran.",
             footer_contact: "Contact",
-            design_note: "Version 1.03"
+            design_note: "Version 1.04"
         },
         fr: {
             current_lang: "Français",
@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
             launch_app: "Lancer l'application",
             footer_tagline: "Connecter l'humanité avec la lumière divine du Noble Coran.",
             footer_contact: "Contact",
-            design_note: "Version 1.03"
+            design_note: "Version 1.04"
         },
         ur: {
             current_lang: "اردو",
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
             launch_app: "ویب ایپ کھولیں",
             footer_tagline: "انسانیت کو قرآنِ مجید کے نور اور ابدی رہنمائی سے جوڑنا۔",
             footer_contact: "رابطہ کریں",
-            design_note: "ورژن 1.03"
+            design_note: "ورژن 1.04"
         },
         no: {
             current_lang: "Norsk",
@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
             launch_app: "Åpne Nettapp",
             footer_tagline: "Koble menneskeheten til det guddommelige lyset fra den edle Koranen.",
             footer_contact: "Kontakt",
-            design_note: "Versjon 1.03"
+            design_note: "Versjon 1.04"
         }
     };
 
@@ -231,22 +231,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // ==========================================
-    // 3. Dynamic Card Carousel Logic (8s Timer + Freeze & Resume)
+    // 3. Dynamic Card Carousel Logic (8s Timer + Freeze & Resume via requestAnimationFrame)
     // ==========================================
     const carouselTrack = document.getElementById('carouselTrack');
     const carouselPrev = document.getElementById('carouselPrev');
     const carouselNext = document.getElementById('carouselNext');
     const carouselDotsContainer = document.getElementById('carouselDots');
     const carouselProgressFill = document.getElementById('carouselProgressFill');
+    const carouselWrapper = document.querySelector('.carousel-wrapper');
     const slides = Array.from(carouselTrack.children);
     
-    const SLIDE_DURATION = 8000; // Slowed down to 8 seconds
+    const SLIDE_DURATION = 8000; // 8 seconds
     let currentSlideIndex = 0;
     
-    // Autoplay & Pause Elapsed Timeline states
-    let slideTimeoutId = null;
-    let slideStartTime = 0;
-    let accumulatedTime = 0; // Tracks elapsed time on active slide
+    let elapsed = 0;
+    let lastTime = performance.now();
+    let animationFrameId = null;
     let isPaused = false;
 
     // Create navigation dots dynamically based on slide count
@@ -273,9 +273,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 dot.classList.remove('active');
             }
         });
-
-        // Trigger slide transition, reset timeline states
-        resetAutoplay();
     };
 
     const moveToSlide = (index) => {
@@ -287,14 +284,24 @@ document.addEventListener('DOMContentLoaded', () => {
             currentSlideIndex = index;
         }
         updateCarousel();
+        
+        // Reset progress tracking
+        elapsed = 0;
+        carouselProgressFill.style.width = '0%';
+        
+        // Match current hover state of the wrapper to maintain paused state if hovered
+        isPaused = carouselWrapper.matches(':hover');
+        lastTime = performance.now();
     };
 
     // Control triggers
-    carouselPrev.addEventListener('click', () => {
+    carouselPrev.addEventListener('click', (e) => {
+        e.stopPropagation();
         moveToSlide(currentSlideIndex - 1);
     });
 
-    carouselNext.addEventListener('click', () => {
+    carouselNext.addEventListener('click', (e) => {
+        e.stopPropagation();
         moveToSlide(currentSlideIndex + 1);
     });
 
@@ -306,75 +313,37 @@ document.addEventListener('DOMContentLoaded', () => {
         moveToSlide(dotIndex);
     });
 
-    // Start fresh 8000ms slide lifecycle
-    const startAutoplay = () => {
-        isPaused = false;
-        slideStartTime = Date.now();
-        
-        // Reset progress bar filling animation instantly
-        carouselProgressFill.style.transition = 'none';
-        carouselProgressFill.style.width = '0%';
-        carouselProgressFill.offsetHeight; // Reflow
-        
-        // Linear transition to 100% over the full slide duration
-        carouselProgressFill.style.transition = `width ${SLIDE_DURATION}ms linear`;
-        carouselProgressFill.style.width = '100%';
-        
-        slideTimeoutId = setTimeout(() => {
-            moveToSlide(currentSlideIndex + 1);
-        }, SLIDE_DURATION);
-    };
-
-    // Freeze slide autoplay and save elapsed time
-    const pauseAutoplay = () => {
-        if (isPaused) return;
-        isPaused = true;
-        
-        // Calculate and add elapsed time
-        const elapsed = Date.now() - slideStartTime;
-        accumulatedTime += elapsed;
-        
-        clearTimeout(slideTimeoutId);
-        
-        // Freeze timeline line visually at current computed width
-        const computedStyle = window.getComputedStyle(carouselProgressFill);
-        const currentWidth = computedStyle.width;
-        carouselProgressFill.style.transition = 'none';
-        carouselProgressFill.style.width = currentWidth;
-    };
-
-    // Resume slide from exactly where it was paused (No restarting from 0%)
-    const resumeAutoplay = () => {
-        if (!isPaused) return;
-        isPaused = false;
-        
-        const remaining = SLIDE_DURATION - accumulatedTime;
-        
-        if (remaining <= 0) {
-            moveToSlide(currentSlideIndex + 1);
-        } else {
-            slideStartTime = Date.now();
-            
-            // Resume progress bar width expansion transition for the remaining time
-            carouselProgressFill.style.transition = `width ${remaining}ms linear`;
-            carouselProgressFill.style.width = '100%';
-            
-            slideTimeoutId = setTimeout(() => {
-                moveToSlide(currentSlideIndex + 1);
-            }, remaining);
-        }
-    };
-
-    const resetAutoplay = () => {
-        clearTimeout(slideTimeoutId);
-        accumulatedTime = 0;
-        startAutoplay();
-    };
-
     // Hover listeners to pause/resume timelines seamlessly
-    const carouselWrapper = document.querySelector('.carousel-wrapper');
-    carouselWrapper.addEventListener('mouseenter', pauseAutoplay);
-    carouselWrapper.addEventListener('mouseleave', resumeAutoplay);
+    carouselWrapper.addEventListener('mouseenter', () => {
+        isPaused = true;
+    });
+
+    carouselWrapper.addEventListener('mouseleave', () => {
+        isPaused = false;
+        lastTime = performance.now(); // Reset lastTime to prevent dt spike
+    });
+
+    // requestAnimationFrame tick loop
+    const tick = (now) => {
+        const dt = now - lastTime;
+        lastTime = now;
+
+        if (!isPaused) {
+            elapsed += dt;
+            if (elapsed >= SLIDE_DURATION) {
+                elapsed = 0;
+                moveToSlide(currentSlideIndex + 1);
+            } else {
+                carouselProgressFill.style.width = `${(elapsed / SLIDE_DURATION) * 100}%`;
+            }
+        }
+
+        animationFrameId = requestAnimationFrame(tick);
+    };
+
+    // Start the animation loop
+    lastTime = performance.now();
+    animationFrameId = requestAnimationFrame(tick);
 
 
     // ==========================================
@@ -438,8 +407,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setTheme(prefersDark ? 'dark' : 'light');
     }
 
-    // Launch Carousel operations
-    startAutoplay();
+    // Carousel loop initialized automatically.
 
 
     // ==========================================

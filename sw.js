@@ -3,7 +3,7 @@
  * Caches core landing assets and Quran recitation track for full offline usage.
  */
 
-const CACHE_NAME = 'nq-portal-cache-v1.03';
+const CACHE_NAME = 'nq-portal-cache-v1.04';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
