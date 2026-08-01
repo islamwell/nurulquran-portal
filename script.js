@@ -18,9 +18,9 @@
 // ============================================================================
 const ANNOUNCEMENTS = [
     {
-        text: "📖 New Dawrah-e-Quran series starting soon!",
-        link: "https://nurulquranlive.com",
-        linkText: "Register Now",
+        text: "📖 Programs for everyone!",
+        link: "https://nurulquran.web.app/#programs",
+        linkText: "View Programs",
         enabled: true
     },
     // Add more announcements below. Only the first enabled one is displayed.
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
             search_no_results: "No results found.",
             footer_tagline: "Connecting humanity with the divine light of the Noble Quran.",
             footer_contact: "Contact",
-            design_note: "v1.0.8 (updated 2026-08-02 00:15)"
+            design_note: "v1.0.9 (updated 2026-08-02 00:20)"
         },
         fr: {
             current_lang: "Français",
@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
             search_no_results: "Aucun résultat trouvé.",
             footer_tagline: "Connecter l'humanité avec la lumière divine du Noble Coran.",
             footer_contact: "Contact",
-            design_note: "v1.0.8 (updated 2026-08-02 00:15)"
+            design_note: "v1.0.9 (updated 2026-08-02 00:20)"
         },
         ur: {
             current_lang: "اردو",
@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
             search_no_results: "Ingen resultater funnet.",
             footer_tagline: "Koble menneskeheten til det guddommelige lyset fra den edle Koranen.",
             footer_contact: "Kontakt",
-            design_note: "v1.0.8 (updated 2026-08-02 00:15)"
+            design_note: "v1.0.9 (updated 2026-08-02 00:20)"
         }
     };
 
