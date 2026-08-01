@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
             search_no_results: "No results found.",
             footer_tagline: "Connecting humanity with the divine light of the Noble Quran.",
             footer_contact: "Contact",
-            design_note: "v1.2.3 (updated 2026-08-02 01:22)"
+            design_note: "v1.2.7 (updated 2026-08-02 02:45)"
         },
         fr: {
             current_lang: "Français",
@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
             search_no_results: "Aucun résultat trouvé.",
             footer_tagline: "Connecter l'humanité avec la lumière divine du Noble Coran.",
             footer_contact: "Contact",
-            design_note: "v1.2.3 (updated 2026-08-02 01:22)"
+            design_note: "v1.2.7 (updated 2026-08-02 02:45)"
         },
         ur: {
             current_lang: "اردو",
@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
             search_no_results: "Ingen resultater funnet.",
             footer_tagline: "Koble menneskeheten til det guddommelige lyset fra den edle Koranen.",
             footer_contact: "Kontakt",
-            design_note: "v1.2.3 (updated 2026-08-02 01:22)"
+            design_note: "v1.2.7 (updated 2026-08-02 02:45)"
         }
     };
 
@@ -181,27 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const langMenu = document.getElementById('langMenu');
     const currentLangLabel = document.getElementById('currentLangLabel');
     const htmlElement = document.documentElement;
-
-    // Toggle Dropdown Menu
-    langBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const wrapper = langBtn.parentElement;
-        const isOpen = wrapper.classList.contains('open');
-        
-        if (isOpen) {
-            wrapper.classList.remove('open');
-            langBtn.setAttribute('aria-expanded', 'false');
-        } else {
-            wrapper.classList.add('open');
-            langBtn.setAttribute('aria-expanded', 'true');
-        }
-    });
-
-    // Close Dropdown when clicking outside
-    document.addEventListener('click', () => {
-        langBtn.parentElement.classList.remove('open');
-        langBtn.setAttribute('aria-expanded', 'false');
-    });
+    const langList = ['en', 'fr', 'ur', 'no'];
 
     // Switch Language Handler
     const searchInput = document.getElementById('searchInput');
@@ -214,57 +194,82 @@ document.addEventListener('DOMContentLoaded', () => {
         if (lang === 'ur') {
             htmlElement.setAttribute('dir', 'rtl');
             htmlElement.setAttribute('lang', 'ur');
+            document.body.classList.add('urdu-mode');
         } else {
             htmlElement.setAttribute('dir', 'ltr');
             htmlElement.setAttribute('lang', lang);
+            document.body.classList.remove('urdu-mode');
         }
 
         // Update active class in menu
-        const menuItems = langMenu.querySelectorAll('li');
-        menuItems.forEach(item => {
-            if (item.getAttribute('data-lang') === lang) {
-                item.classList.add('active');
-            } else {
-                item.classList.remove('active');
-            }
-        });
+        if (langMenu) {
+            const menuItems = langMenu.querySelectorAll('li');
+            menuItems.forEach(item => {
+                if (item.getAttribute('data-lang') === lang) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
 
         // Update Label
-        currentLangLabel.textContent = translations[lang].current_lang;
+        if (currentLangLabel) {
+            currentLangLabel.textContent = translations[lang].current_lang;
+        }
 
         // Translate Static IDs
-        document.getElementById('heroBadge').textContent = translations[lang].hero_badge;
-        document.getElementById('heroTitle').textContent = translations[lang].hero_title;
-        document.getElementById('heroSubtitle').textContent = translations[lang].hero_subtitle;
+        const heroBadge = document.getElementById('heroBadge');
+        if (heroBadge) heroBadge.textContent = translations[lang].hero_badge;
+        const heroTitle = document.getElementById('heroTitle');
+        if (heroTitle) heroTitle.textContent = translations[lang].hero_title;
+        const heroSubtitle = document.getElementById('heroSubtitle');
+        if (heroSubtitle) heroSubtitle.textContent = translations[lang].hero_subtitle;
 
         // Translate elements with data-translate attribute
         const translatableElements = document.querySelectorAll('[data-translate]');
         translatableElements.forEach(el => {
             const key = el.getAttribute('data-translate');
-            if (translations[lang][key]) {
+            if (translations[lang] && translations[lang][key]) {
                 el.textContent = translations[lang][key];
             }
         });
 
-        // Translate search placeholder and no-results
+        // Translate search placeholder and no-results if search bar exists
         if (searchInput) searchInput.placeholder = translations[lang].search_placeholder || searchInput.placeholder;
         if (searchNoResults) searchNoResults.textContent = translations[lang].search_no_results || searchNoResults.textContent;
 
         // Retrigger carousel slide alignment to adjust LTR/RTL offset directions
-        updateCarousel();
+        if (typeof updateCarousel === 'function') {
+            updateCarousel();
+        }
 
         // Save selection
         localStorage.setItem('nq_language', lang);
     };
 
-    // Add click listeners to options
-    langMenu.addEventListener('click', (e) => {
-        const selectedOption = e.target.closest('li');
-        if (!selectedOption) return;
+    // Cycle language on button click
+    if (langBtn) {
+        langBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const currentLang = htmlElement.getAttribute('lang') || 'en';
+            let idx = langList.indexOf(currentLang);
+            if (idx === -1) idx = 0;
+            const nextLang = langList[(idx + 1) % langList.length];
+            setLanguage(nextLang);
+        });
+    }
 
-        const lang = selectedOption.getAttribute('data-lang');
-        setLanguage(lang);
-    });
+    // Direct selection from dropdown options if menu exists
+    if (langMenu) {
+        langMenu.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const selectedOption = e.target.closest('li');
+            if (!selectedOption) return;
+            const lang = selectedOption.getAttribute('data-lang');
+            setLanguage(lang);
+        });
+    }
 
 
     // ==========================================
@@ -683,78 +688,79 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // ==========================================
-    // 8. Search / Filter Logic
+    // 8. Search / Filter Logic (Guarded if searchInput exists)
     // ==========================================
-    const allSearchableCards = document.querySelectorAll('.portal-card, .branch-card, .app-card');
-    const allSections = document.querySelectorAll('.portal-group-section');
+    if (searchInput) {
+        const allSearchableCards = document.querySelectorAll('.portal-card, .branch-card, .app-card');
+        const allSections = document.querySelectorAll('.portal-group-section');
 
-    searchInput.addEventListener('input', () => {
-        const query = searchInput.value.trim().toLowerCase();
-        let totalVisible = 0;
+        searchInput.addEventListener('input', () => {
+            const query = searchInput.value.trim().toLowerCase();
+            let totalVisible = 0;
 
-        allSearchableCards.forEach(card => {
-            const text = card.textContent.toLowerCase();
-            const href = (card.getAttribute('href') || '').toLowerCase();
-            const match = !query || text.includes(query) || href.includes(query);
-            
-            if (match) {
-                card.classList.remove('search-hidden');
-                totalVisible++;
-            } else {
-                card.classList.add('search-hidden');
+            allSearchableCards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                const href = (card.getAttribute('href') || '').toLowerCase();
+                const match = !query || text.includes(query) || href.includes(query);
+                
+                if (match) {
+                    card.classList.remove('search-hidden');
+                    totalVisible++;
+                } else {
+                    card.classList.add('search-hidden');
+                }
+            });
+
+            // Hide entire sections if all children are hidden
+            allSections.forEach(section => {
+                const visibleCards = section.querySelectorAll('.portal-card:not(.search-hidden), .branch-card:not(.search-hidden), .app-card:not(.search-hidden)');
+                if (visibleCards.length === 0 && query) {
+                    section.classList.add('search-section-hidden');
+                } else {
+                    section.classList.remove('search-section-hidden');
+                }
+            });
+
+            // Show "no results" message
+            if (searchNoResults) {
+                if (totalVisible === 0 && query) {
+                    searchNoResults.classList.add('visible');
+                } else {
+                    searchNoResults.classList.remove('visible');
+                }
             }
         });
-
-        // Hide entire sections if all children are hidden
-        allSections.forEach(section => {
-            const visibleCards = section.querySelectorAll('.portal-card:not(.search-hidden), .branch-card:not(.search-hidden), .app-card:not(.search-hidden)');
-            if (visibleCards.length === 0 && query) {
-                section.classList.add('search-section-hidden');
-            } else {
-                section.classList.remove('search-section-hidden');
-            }
-        });
-
-        // Show "no results" message
-        if (totalVisible === 0 && query) {
-            searchNoResults.classList.add('visible');
-        } else {
-            searchNoResults.classList.remove('visible');
-        }
-    });
-
+    }
 
     // ==========================================
-    // 9. Announcement Banner System
+    // 9. Announcement Banner System (Guarded if banner exists)
     // ==========================================
     const announcementBanner = document.getElementById('announcementBanner');
     const announcementText = document.getElementById('announcementText');
     const announcementDismiss = document.getElementById('announcementDismiss');
 
-    // Find the first enabled announcement
-    const activeAnnouncement = ANNOUNCEMENTS.find(a => a.enabled);
+    if (announcementBanner && announcementText && announcementDismiss) {
+        const activeAnnouncement = ANNOUNCEMENTS.find(a => a.enabled);
 
-    if (activeAnnouncement) {
-        // Build the announcement HTML
-        let html = activeAnnouncement.text;
-        if (activeAnnouncement.link && activeAnnouncement.linkText) {
-            html += ` <a href="${activeAnnouncement.link}" target="_blank" rel="noopener">${activeAnnouncement.linkText}</a>`;
+        if (activeAnnouncement) {
+            let html = activeAnnouncement.text;
+            if (activeAnnouncement.link && activeAnnouncement.linkText) {
+                html += ` <a href="${activeAnnouncement.link}" target="_blank" rel="noopener">${activeAnnouncement.linkText}</a>`;
+            }
+            announcementText.innerHTML = html;
+
+            const announcementKey = 'nq_dismissed_' + btoa(encodeURIComponent(activeAnnouncement.text)).slice(0, 20);
+            const wasDismissed = localStorage.getItem(announcementKey);
+
+            if (!wasDismissed) {
+                announcementBanner.classList.remove('hidden');
+            }
+
+            announcementDismiss.addEventListener('click', () => {
+                announcementBanner.classList.add('hidden');
+                localStorage.setItem(announcementKey, 'true');
+            });
         }
-        announcementText.innerHTML = html;
-
-        // Check if this announcement was previously dismissed (by hashing the text)
-        const announcementKey = 'nq_dismissed_' + btoa(encodeURIComponent(activeAnnouncement.text)).slice(0, 20);
-        const wasDismissed = localStorage.getItem(announcementKey);
-
-        if (!wasDismissed) {
-            announcementBanner.classList.remove('hidden');
-        }
-
-        // Dismiss handler
-        announcementDismiss.addEventListener('click', () => {
-            announcementBanner.classList.add('hidden');
-            localStorage.setItem(announcementKey, 'true');
-        });
     }
 
     // ==========================================

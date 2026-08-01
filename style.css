@@ -2746,14 +2746,14 @@ body.urdu-mode .slide-desc {
    UI BUG FIXES & MISSING SELECTORS
    ========================================================================== */
 
-/* --- Header container: logo left, controls right --- */
+/* --- Header container: logo left, controls right (full edge-to-edge justification) --- */
 .header-container {
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    max-width: var(--container-max);
-    margin-inline: auto;
+    max-width: 100%;
+    margin: 0;
     gap: var(--space-4);
 }
 
@@ -2874,12 +2874,15 @@ html:not([data-theme="dark"]) .sun-icon {
     display: block !important;
 }
 
-/* --- Footer layout: contact right-justified --- */
+/* --- Footer layout: contact right-justified (full edge-to-edge justification) --- */
 .footer-container {
     display: flex;
     flex-wrap: wrap;
     align-items: flex-start;
     justify-content: space-between;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
     gap: clamp(28px, 4vw, 48px);
 }
 .footer-brand-info {
