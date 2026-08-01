@@ -1,7 +1,7 @@
 /**
  * NurulQuran Landing Page JavaScript Core - Version 1.07
  * Handles: Multi-Language Translation (EN, FR, UR, NO), RTL switching,
- * Theme Toggle Cycle (Light -> Dark -> Nature), nature video play/pause,
+ * Theme Toggle (Light <-> Dark), floating Quran audio player with playlist,
  * floating Quran audio player with playlist + volume + progress bar,
  * scroll indicator, search/filter, back-to-top, keyboard navigation,
  * touch swipe for carousel, and announcement banner system.
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
             search_no_results: "No results found.",
             footer_tagline: "Connecting humanity with the divine light of the Noble Quran.",
             footer_contact: "Contact",
-            design_note: "v1.0.9 (updated 2026-08-02 00:20)"
+            design_note: "v1.1.0 (updated 2026-08-02 00:37)"
         },
         fr: {
             current_lang: "Français",
@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
             search_no_results: "Aucun résultat trouvé.",
             footer_tagline: "Connecter l'humanité avec la lumière divine du Noble Coran.",
             footer_contact: "Contact",
-            design_note: "v1.0.9 (updated 2026-08-02 00:20)"
+            design_note: "v1.1.0 (updated 2026-08-02 00:37)"
         },
         ur: {
             current_lang: "اردو",
@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
             search_no_results: "Ingen resultater funnet.",
             footer_tagline: "Koble menneskeheten til det guddommelige lyset fra den edle Koranen.",
             footer_contact: "Kontakt",
-            design_note: "v1.0.9 (updated 2026-08-02 00:20)"
+            design_note: "v1.1.0 (updated 2026-08-02 00:37)"
         }
     };
 
@@ -268,33 +268,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // ==========================================
-    // 2. Three-State Light / Dark / Nature Theme
+    // 2. Light / Dark Theme Toggle
     // ==========================================
     const themeToggleBtn = document.getElementById('themeToggleBtn');
-    const natureVideo = document.getElementById('natureVideo');
-    const themes = ['light', 'dark', 'nature'];
+    const themes = ['light', 'dark'];
 
     const setTheme = (theme) => {
-        htmlElement.setAttribute('data-theme', theme);
-        localStorage.setItem('nq_theme', theme);
-        
-        // Dynamic background video control (Preload none, load on demand)
-        if (theme === 'nature') {
-            if (natureVideo.readyState === 0) {
-                natureVideo.load();
-            }
-            natureVideo.play().catch(err => console.log("Video autoplay blocked", err));
-        } else {
-            natureVideo.pause();
-        }
+        const validTheme = themes.includes(theme) ? theme : 'light';
+        htmlElement.setAttribute('data-theme', validTheme);
+        localStorage.setItem('nq_theme', validTheme);
     };
 
-    // Toggle theme cycling action
+    // Toggle theme action (Light <-> Dark)
     themeToggleBtn.addEventListener('click', () => {
         const currentTheme = htmlElement.getAttribute('data-theme') || 'light';
-        const currentIndex = themes.indexOf(currentTheme);
-        const nextIndex = (currentIndex + 1) % themes.length;
-        setTheme(themes[nextIndex]);
+        const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        setTheme(nextTheme);
     });
 
 
