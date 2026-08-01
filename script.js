@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
             search_no_results: "No results found.",
             footer_tagline: "Connecting humanity with the divine light of the Noble Quran.",
             footer_contact: "Contact",
-            design_note: "v1.2.0 (updated 2026-08-02 00:57)"
+            design_note: "v1.2.1 (updated 2026-08-02 01:04)"
         },
         fr: {
             current_lang: "Français",
@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
             search_no_results: "Aucun résultat trouvé.",
             footer_tagline: "Connecter l'humanité avec la lumière divine du Noble Coran.",
             footer_contact: "Contact",
-            design_note: "v1.2.0 (updated 2026-08-02 00:57)"
+            design_note: "v1.2.1 (updated 2026-08-02 01:04)"
         },
         ur: {
             current_lang: "اردو",
@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
             search_no_results: "Ingen resultater funnet.",
             footer_tagline: "Koble menneskeheten til det guddommelige lyset fra den edle Koranen.",
             footer_contact: "Kontakt",
-            design_note: "v1.2.0 (updated 2026-08-02 00:57)"
+            design_note: "v1.2.1 (updated 2026-08-02 01:04)"
         }
     };
 
@@ -321,6 +321,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const isRTL = htmlElement.getAttribute('dir') === 'rtl';
         const offset = isRTL ? (currentSlideIndex * 100) : -(currentSlideIndex * 100);
         carouselTrack.style.transform = `translateX(${offset}%)`;
+
+        // Update slides active state
+        slides.forEach((slide, index) => {
+            if (index === currentSlideIndex) {
+                slide.classList.add('active');
+                slide.setAttribute('aria-hidden', 'false');
+            } else {
+                slide.classList.remove('active');
+                slide.setAttribute('aria-hidden', 'true');
+            }
+        });
         
         // Update dot indicators
         dots.forEach((dot, index) => {
@@ -331,6 +342,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     };
+
+    // Initial alignment on load
+    updateCarousel();
 
     const moveToSlide = (index) => {
         if (index < 0) {
