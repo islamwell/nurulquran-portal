@@ -1458,13 +1458,20 @@ html:not([data-theme="dark"]):not([data-theme="nature"]) .sun-icon {
     background-color: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
-    padding: 3rem;
+    padding: 2.5rem 3rem;
     box-shadow: var(--card-shadow);
     position: relative;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    gap: 2.5rem;
+    gap: 2rem;
+    text-align: left;
+}
+
+.hero-lecturer-banner {
+    margin: 0 auto 3.5rem auto;
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
 }
 
 .lecturer-banner-bg {
@@ -1514,19 +1521,27 @@ html:not([data-theme="dark"]):not([data-theme="nature"]) .sun-icon {
 .social-link-card {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 1rem;
-    background-color: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    padding: 1.25rem;
+    padding: 1.25rem 1.5rem;
     border-radius: var(--radius-md);
     text-decoration: none;
-    color: var(--text-primary);
-    transition: transform var(--transition-fast), border-color var(--transition-fast), background-color var(--transition-fast), color var(--transition-fast);
+    font-weight: 600;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    color: #ffffff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    transition: transform var(--transition-normal), box-shadow var(--transition-normal), border-color var(--transition-normal);
 }
 
-.social-link-card:hover {
-    transform: translateY(-3px);
-    color: #ffffff;
+.social-link-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+    z-index: -1;
 }
 
 .social-icon-wrapper {
@@ -1541,29 +1556,68 @@ html:not([data-theme="dark"]):not([data-theme="nature"]) .sun-icon {
 }
 
 .social-title {
-    font-size: 0.95rem;
-    font-weight: 600;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #ffffff;
 }
 
 .social-handle {
-    font-size: 0.75rem;
-    opacity: 0.7;
+    font-size: 0.78rem;
+    opacity: 0.88;
+    color: #ffffff;
 }
 
-/* Individual Social Hover Aesthetics */
+/* Base Colors: Red, Green, Blue */
+.youtube-color {
+    background-color: #d32f2f;
+    border: 1px solid #b71c1c;
+}
+
+.youtube-color::before {
+    background: linear-gradient(135deg, #ff4b2b 0%, #ff416c 100%);
+}
+
+.whatsapp-color {
+    background-color: #1b9a4b;
+    border: 1px solid #128c7e;
+}
+
+.whatsapp-color::before {
+    background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);
+}
+
+.facebook-color {
+    background-color: #1877f2;
+    border: 1px solid #0d5cb6;
+}
+
+.facebook-color::before {
+    background: linear-gradient(135deg, #1877f2 0%, #00c6ff 100%);
+}
+
+/* Hover States: Gradient Display, Elevation, & Glow */
+.social-link-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    color: #ffffff;
+}
+
+.social-link-card:hover::before {
+    opacity: 1;
+}
+
 .youtube-color:hover {
-    background-color: hsl(0, 75%, 45%);
-    border-color: hsl(0, 75%, 45%);
+    border-color: #ff4b2b;
+    box-shadow: 0 10px 25px -5px rgba(255, 65, 108, 0.5), 0 0 15px rgba(255, 75, 43, 0.3);
 }
 
 .whatsapp-color:hover {
-    background-color: hsl(142, 70%, 35%);
-    border-color: hsl(142, 70%, 35%);
+    border-color: #00b09b;
+    box-shadow: 0 10px 25px -5px rgba(0, 176, 155, 0.5), 0 0 15px rgba(150, 201, 61, 0.3);
 }
 
 .facebook-color:hover {
-    background-color: hsl(220, 75%, 40%);
-    border-color: hsl(220, 75%, 40%);
+    border-color: #00c6ff;
+    box-shadow: 0 10px 25px -5px rgba(24, 119, 242, 0.5), 0 0 15px rgba(0, 198, 255, 0.3);
 }
 
 /* --- Floating Quran Audio Player --- */
