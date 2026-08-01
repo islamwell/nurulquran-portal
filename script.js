@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
             search_no_results: "No results found.",
             footer_tagline: "Connecting humanity with the divine light of the Noble Quran.",
             footer_contact: "Contact",
-            design_note: "v1.2.1 (updated 2026-08-02 01:04)"
+            design_note: "v1.2.2 (updated 2026-08-02 01:15)"
         },
         fr: {
             current_lang: "Français",
@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
             search_no_results: "Aucun résultat trouvé.",
             footer_tagline: "Connecter l'humanité avec la lumière divine du Noble Coran.",
             footer_contact: "Contact",
-            design_note: "v1.2.1 (updated 2026-08-02 01:04)"
+            design_note: "v1.2.2 (updated 2026-08-02 01:15)"
         },
         ur: {
             current_lang: "اردو",
@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
             search_no_results: "Ingen resultater funnet.",
             footer_tagline: "Koble menneskeheten til det guddommelige lyset fra den edle Koranen.",
             footer_contact: "Kontakt",
-            design_note: "v1.2.1 (updated 2026-08-02 01:04)"
+            design_note: "v1.2.2 (updated 2026-08-02 01:15)"
         }
     };
 
